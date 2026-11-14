@@ -1,0 +1,25 @@
+Book Flip Sounds — Voltiment555
+https://opengameart.org/content/book-flip-sounds
+Source: BookFlip_SFX.zip / BookFlip7.wav
+License: CC0 1.0 Universal
+https://creativecommons.org/publicdomain/zero/1.0/
+Retrieved 2026-10-24. Source page explicitly identifies the pack as CC0.
+App derivative: mixed to mono, resampled to 22050 Hz and peak-normalized.
+0.3.1: riffle tempo increased by 30% using pitch-preserving time compression (FFmpeg atempo=1.30).
+Riffle playback crossfades varied sections of this recording; no fixed page-sound loop.
+
+Single-page derivatives: BookFlip1.wav, BookFlip10.wav, BookFlip12.wav.
+Trimmed, high-pass filtered, loudness adjusted, faded and resampled to mono 22050 Hz.
+User-supplied page-flip MP3s were timing references only; their audio is not bundled. The separate bookshelf recording is credited below.
+0.4.7: riffle rebuilt from the normalized 0.3.0 recording with pitch-preserving atempo=2.0, highpass=180Hz and short edge fades. Live playback follows page speed immediately; varied overlapping sections remain.
+0.4.7 quiet-gap edit: silenceremove start_duration=0.01/start_threshold=-48dB, stop_duration=0.06/stop_threshold=-48dB/stop_silence=0.02 before atempo. Edge fades applied to the first8ms and last25ms.
+
+book-pull-v3.wav — Adding books to a bookshelf
+Artist: .Chris_Douris. (Freesound), published by freesound_community on Pixabay.
+Source: https://pixabay.com/es/sound-effects/familiar-adding-books-to-a-bookshelf-26609/
+License: Pixabay Content License, https://pixabay.com/service/terms/ (section 5)
+Verified 2026-10-26: source page explicitly labels Pixabay Content License.
+User-provided original: freesound_community-adding-books-to-a-bookshelf-26609.mp3.
+Derivative: 17.9–18.75s, high-pass70Hz, gain2, edge fades, mono44100Hz; playback gain0.7.
+Integrated with the app's interactive book-pulling animation; not distributed as standalone audio.
+Earlier preview excerpts v1/v2 are not shipped.
