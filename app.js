@@ -1,6 +1,6 @@
 'use strict';
 const REPO='svalu/paperbook-releases';
-let release={version:'0.6.36',url:'https://github.com/svalu/paperbook-releases/releases/download/v0.6.36/paperbook-0.6.36.apk',page:'https://github.com/svalu/paperbook-releases/releases/tag/v0.6.36',bytes:33836432};
+let release={version:'0.6.38',url:'https://github.com/svalu/paperbook-releases/releases/download/v0.6.38/paperbook-0.6.38.apk',page:'https://github.com/svalu/paperbook-releases/releases/tag/v0.6.38',bytes:33951362};
 const dialog=document.querySelector('#guide-dialog');let mode='install',step=0,opener,guideMessage='';
 let toastTimer;
 function toast(text){const node=document.querySelector('#toast');node.textContent=text;node.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>node.classList.remove('show'),5000);}
