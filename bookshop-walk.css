@@ -65,11 +65,35 @@ html:has(.bookshop-walk[open]) { overflow: hidden; }
   height: 100%;
 }
 
-.walk-pot, .walk-canopy, .walk-floor, .walk-door-leaf {
+.walk-pot, .walk-canopy, .walk-floor, .walk-railing i, .walk-door-front, .walk-door-back {
   background: url("assets/walk-distant.webp") 0 0 / 100% 100% no-repeat;
 }
 
 .walk-layers-ready .walk-flat { opacity: var(--flat-opacity, 1); }
+
+.walk-rail-wall {
+  position: absolute;
+  left: 60.526%;
+  top: 37.513%;
+  width: 8.971%;
+  height: 20.616%;
+  mask-image: radial-gradient(ellipse 69% 65%, #000 63%, transparent 96%);
+}
+
+.walk-railing, .walk-railing i {
+  position: absolute;
+  inset: 0;
+}
+
+.walk-rail-wall, .walk-railing { visibility: hidden; }
+.walk-rail-ready :is(.walk-rail-wall, .walk-railing) { visibility: visible; }
+.walk-railing { transform: translate(var(--rail-x, 0%), var(--rail-y, 0%)); }
+.walk-railing i:nth-child(1) {
+  clip-path: polygon(62.12% 50.9%, 62.45% 50.35%, 66.94% 40.1%, 67.37% 40.61%, 67.64% 41.7%, 67.37% 42.46%, 66.91% 41.26%, 62.7% 51.35%, 62.22% 51.72%);
+}
+.walk-railing i:nth-child(2) { clip-path: polygon(66.4% 41.6%, 66.92% 41.6%, 66.97% 53.3%, 66.55% 53.5%); }
+.walk-railing i:nth-child(3) { clip-path: polygon(64.53% 45.55%, 64.95% 45.37%, 65.02% 55.65%, 64.64% 55.67%); }
+.walk-railing i:nth-child(4) { clip-path: polygon(62.35% 50.48%, 62.74% 50.28%, 62.83% 55.82%, 62.4% 55.83%); }
 
 .walk-floor {
   clip-path: polygon(23% 78%, 77% 78%, 86% 100%, 14% 100%);
@@ -112,16 +136,57 @@ html:has(.bookshop-walk[open]) { overflow: hidden; }
   width: 541.1%;
   height: 180.9615%;
   max-width: none;
+  transform: translateX(var(--room-pan, 0%)) scale(1.07);
 }
 
-.walk-door { perspective: 460px; perspective-origin: right center; }
+.walk-doorway::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  box-shadow: inset 7px 1px 10px #211710ac, inset -4px 0 8px #1c1a10a8, inset 0 7px 8px #211710a8;
+}
+
+.walk-door {
+  --door-depth: clamp(6px, .7vw, 11px);
+  perspective: 540px;
+  perspective-origin: right center;
+}
 .walk-door-leaf {
+  position: absolute;
+  inset: 0;
+  transform-origin: right center;
+  transform-style: preserve-3d;
+  transform: rotateY(var(--door-angle, 0deg));
+}
+.walk-door-front, .walk-door-back {
   position: absolute;
   inset: 0;
   background-size: 1092.9% 466.2%;
   background-position: 58.17% 43.79%;
-  transform-origin: right center;
-  transform: rotateY(var(--door-angle, 0deg));
+  backface-visibility: hidden;
+}
+.walk-door-front { transform: translateZ(calc(var(--door-depth) / 2)); }
+.walk-door-back {
+  transform: translateZ(calc(var(--door-depth) / -2)) rotateY(180deg);
+  filter: brightness(.64) saturate(.8);
+}
+.walk-door-edge, .walk-door-bottom {
+  position: absolute;
+  background: repeating-linear-gradient(92deg, #664731 0 2px, #463222 4px 5px, #795a3c 7px 9px);
+  box-shadow: inset 1px 0 #eeba7280, inset -2px 0 #263f32;
+}
+.walk-door-edge {
+  inset: 0 auto 0 0;
+  width: var(--door-depth);
+  transform-origin: left center;
+  transform: translateZ(calc(var(--door-depth) / 2)) rotateY(90deg);
+}
+.walk-door-bottom {
+  inset: 100% 0 auto 0;
+  height: var(--door-depth);
+  transform-origin: center top;
+  transform: translateZ(calc(var(--door-depth) / 2)) rotateX(-90deg);
+  filter: brightness(.66);
 }
 
 .walk-actions {

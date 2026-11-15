@@ -6,8 +6,8 @@
  <title>넘김 · 음... 딱 한권만...</title>
  <link rel="icon" type="image/svg+xml" href="assets/mark.svg"><link rel="stylesheet" href="style.css?v=17"><link rel="stylesheet" href="bookshop.css?v=17"><script src="app.js?v=19" defer></script><link rel="stylesheet" href="flip-demo.css?v=17"><script type="module" src="flip-demo.js?v=31"></script>
 <link rel="stylesheet" href="book-first.css?v=23">
- <link rel="stylesheet" href="bookshop-walk.css?v=5">
- <script type="module" src="bookshop-walk.js?v=5"></script>
+ <link rel="stylesheet" href="bookshop-walk.css?v=6">
+ <script type="module" src="bookshop-walk.js?v=6"></script>
 </head>
 <body>
  <a class="skip" href="#main">본문으로</a>
@@ -16,6 +16,8 @@
  <div class="walk-stage">
   <div class="walk-view" aria-hidden="true">
    <img class="walk-clean" src="assets/walk-clean.webp" width="1672" height="941" alt="" fetchpriority="low">
+   <img class="walk-rail-wall" src="assets/walk-rail-wall.webp" width="150" height="194" alt="" fetchpriority="low">
+   <div class="walk-railing"><i></i><i></i><i></i><i></i></div>
    <div class="walk-floor"></div>
    <div class="walk-pot walk-pot-left"></div>
    <div class="walk-pot walk-pot-right"></div>
@@ -24,7 +26,12 @@
    <div class="walk-doorway">
     <img src="assets/walk-interior.webp" width="1672" height="941" alt="" fetchpriority="low">
    </div>
-   <div class="walk-door"><div class="walk-door-leaf"></div></div>
+   <div class="walk-door">
+    <div class="walk-door-leaf">
+     <i class="walk-door-front"></i><i class="walk-door-back"></i>
+     <i class="walk-door-edge"></i><i class="walk-door-bottom"></i>
+    </div>
+   </div>
   </div>
   <div class="walk-actions">
    <button class="walk-sound" type="button" aria-pressed="false">입장 소리</button>
