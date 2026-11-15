@@ -1,10 +1,12 @@
 import {paperFrame,projectPaper,paperNormal,paperFacing} from './curl-geometry.js';
 import {RecordedPage} from './page-audio.js';
+import {storyLines} from './rion-story.js?v=1';
 
 const canvas=document.querySelector('#demo-book'),ctx=canvas.getContext('2d');
 const prev=document.querySelector('#demo-prev'),next=document.querySelector('#demo-next'),soundButton=document.querySelector('#demo-sound'),status=document.querySelector('#demo-status');
 const loading=document.querySelector('#demo-loading');
 const hint=document.querySelector('.turn-hint'),bookSection=document.querySelector('#try-book'),replay=document.querySelector('#demo-replay');
+const storyDetails=document.querySelector('#demo-story'),storyText=document.querySelector('#demo-story-text');
 const PAGE_WIDTH=480,PAGE_HEIGHT=720,PAGE_COUNT=22;
 const POSITION_KEY='neomgim-rion-socks-spread';
 const COVER_KEY='neomgim-rion-socks-cover';
@@ -28,7 +30,8 @@ soundButton.onclick=()=>{soundOn=!soundOn;soundButton.setAttribute('aria-pressed
 async function loadComic(){
  async function loadImage(filename){
   const page=new Image();
-  page.src=new URL(`assets/rion-socks/${filename}.webp${/^(01|16|18|19|20)$/.test(filename) ? "?v=kotori" : ""}`,import.meta.url);
+  const path = /^\d{2}$/.test(filename) ? `story/${filename}` : filename;
+  page.src=new URL(`assets/rion-socks/${path}.webp`,import.meta.url);
   await page.decode();
   return page;
  }
@@ -105,6 +108,20 @@ function canTurn(dir){
  const target=spread+dir;
  return ready&&!turn&&target>=0&&!!pages[target*2]&&!!pages[target*2+1];
 }
+function updateStoryText(){
+ const showsText = ready && spread > 0;
+ storyDetails.hidden = !showsText;
+ if (!showsText || storyText.dataset.spread === String(spread)) return;
+ const first = (spread - 1) * 2;
+ const paragraphs = storyLines.slice(first, first + 2).map(lines => {
+  const paragraph = document.createElement('p');
+  paragraph.textContent = lines.join(' ');
+  return paragraph;
+ });
+ storyText.replaceChildren(...paragraphs);
+ storyText.dataset.spread = String(spread);
+}
+
 function update(){
  const closed=spread===-1;
  const canClose=ready&&!closed&&!!cover&&!turn;
@@ -116,6 +133,7 @@ function update(){
  next.title=closed?'책 펼치기':'다음 두 쪽';
  next.setAttribute('aria-label',next.title);
  bookSection.toggleAttribute('data-cover',closed);
+ updateStoryText();
  replay.disabled=!canClose;
  hint.textContent=closed?'표지를 누르거나 왼쪽으로 밀어봐.':'오른쪽 책장을 끌어 넘겨봐.';
  if(!ready)return;
@@ -206,4 +224,6 @@ new IntersectionObserver(([entry])=>{if(entry.isIntersecting){prepareAudio();}el
 update();
 void loadComic();
 
-new IntersectionObserver(([entry])=>document.body.classList.toggle('past-first-book',!entry.isIntersecting),{threshold:0}).observe(document.querySelector('#try-book'));
+new IntersectionObserver(([entry]) => {
+ document.body.classList.toggle('past-first-book', entry.boundingClientRect.bottom <= 0);
+}, { threshold: 0 }).observe(bookSection);

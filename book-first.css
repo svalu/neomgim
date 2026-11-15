@@ -101,6 +101,29 @@
   text-align: center;
 }
 .sample-credit strong { color: #fff0d6; font-weight: 600; }
+.demo-story {
+  width: min(36rem, 100%);
+  margin-top: 6px;
+  color: #fff0d6;
+}
+.demo-story summary {
+  width: fit-content;
+  min-height: 44px;
+  margin-inline: auto;
+  padding: 12px 10px;
+  color: #f8d499;
+  font-size: 14px;
+  cursor: pointer;
+}
+.demo-story div {
+  padding: 14px 20px;
+  border-radius: 12px;
+  background: #241a12e8;
+  font: 18px/1.7 Bookshop, serif;
+  word-break: keep-all;
+}
+.demo-story p { margin: 0; }
+.demo-story p + p { margin-top: 8px; }
 .sample-credit a, .first-book .discover-bookshop {
   display: inline-flex;
   align-items: center;
