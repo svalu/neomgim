@@ -107,12 +107,16 @@ function canTurn(dir){
 }
 function update(){
  const closed=spread===-1;
- prev.disabled=!canTurn(-1);
+ const canClose=ready&&!closed&&!!cover&&!turn;
+ const returnToCover=spread===0&&canClose;
+ prev.disabled=!returnToCover&&!canTurn(-1);
+ prev.title=spread===0&&cover?'이전: 표지':'이전 두 쪽';
+ prev.setAttribute('aria-label',prev.title);
  next.disabled=!canTurn(1);
  next.title=closed?'책 펼치기':'다음 두 쪽';
  next.setAttribute('aria-label',next.title);
  bookSection.toggleAttribute('data-cover',closed);
- replay.hidden=closed||!cover||!pages[0]||!!turn;
+ replay.disabled=!canClose;
  hint.textContent=closed?'표지를 누르거나 왼쪽으로 밀어봐.':'오른쪽 책장을 끌어 넘겨봐.';
  if(!ready)return;
  const label=closed?'표지':`${spread*2+1}–${spread*2+2} / ${PAGE_COUNT}쪽`;
@@ -153,18 +157,22 @@ function settle(commit){
  raf=requestAnimationFrame(tick);
 }
 function flip(dir){unlock();if(start(dir))settle(true);}
-prev.onclick=()=>flip(-1);next.onclick=()=>flip(1);
-replay.onclick=()=>{
+function goToCover(focusNext){
+ if(!ready||!cover||spread<0||turn)return;
  spread=-1;
  bookSection.classList.remove('has-turned');
  try{localStorage.removeItem(POSITION_KEY);}catch{}
  render();
  update();
- next.focus({preventScroll:true});
-};
+ if(focusNext)next.focus({preventScroll:true});
+}
+function previous(focusNext){if(spread===0)goToCover(focusNext);else flip(-1);}
+prev.onclick=()=>previous(true);
+next.onclick=()=>flip(1);
+replay.onclick=()=>goToCover(true);
 canvas.addEventListener('keydown',e=>{
  if(spread===-1&&(e.key==='Enter'||e.key===' ')){e.preventDefault();flip(1);}
- else if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.preventDefault();flip(e.key==='ArrowRight'?1:-1);}
+ else if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.preventDefault();if(e.key==='ArrowRight')flip(1);else previous(false);}
 });
 canvas.addEventListener('pointerdown',e=>{
  if(!ready||turn||drag||!e.isPrimary||e.button!==0)return;
