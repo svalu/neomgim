@@ -6,14 +6,13 @@
  <title>넘김 · 음... 딱 한권만...</title>
  <link rel="icon" type="image/svg+xml" href="assets/mark.svg"><link rel="stylesheet" href="style.css?v=17"><link rel="stylesheet" href="bookshop.css?v=17"><script src="app.js?v=19" defer></script><link rel="stylesheet" href="flip-demo.css?v=17"><script type="module" src="flip-demo.js?v=31"></script>
 <link rel="stylesheet" href="book-first.css?v=23">
- <link rel="stylesheet" href="bookshop-walk.css?v=4">
- <script type="module" src="bookshop-walk.js?v=4"></script>
+ <link rel="stylesheet" href="bookshop-walk.css?v=5">
+ <script type="module" src="bookshop-walk.js?v=5"></script>
 </head>
 <body>
  <a class="skip" href="#main">본문으로</a>
  <header class="header wrap quiet-header"><a class="brand" href="#"><span>넘김</span></a><nav aria-label="주 메뉴"><a href="#downloads">다운로드 ↓</a></nav></header>
- <main id="main">
-<section class="bookshop-walk" aria-label="고양이책방 입구">
+<dialog class="bookshop-walk" aria-label="고양이책방 입장">
  <div class="walk-stage">
   <div class="walk-view" aria-hidden="true">
    <img class="walk-clean" src="assets/walk-clean.webp" width="1672" height="941" alt="" fetchpriority="low">
@@ -28,11 +27,12 @@
    <div class="walk-door"><div class="walk-door-leaf"></div></div>
   </div>
   <div class="walk-actions">
-   <a class="walk-enter" href="#try-book">책방 들어가기 <span aria-hidden="true">↓</span></a>
-   <p>아래로 스크롤해도 문이 열려.</p>
+   <button class="walk-sound" type="button" aria-pressed="false">입장 소리</button>
+   <button class="walk-skip" type="button" autofocus>건너뛰기</button>
   </div>
  </div>
-</section>
+</dialog>
+ <main id="main">
 <section class="flip-demo wrap first-book" id="try-book" aria-labelledby="flip-heading">
  <h1 id="flip-heading" tabindex="-1">음... 딱 한권만...</h1>
  <div class="demo-stage">
