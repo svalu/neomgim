@@ -7,9 +7,12 @@ const loading=document.querySelector('#demo-loading');
 const hint=document.querySelector('.turn-hint'),bookSection=document.querySelector('#try-book'),replay=document.querySelector('#demo-replay');
 const PAGE_WIDTH=480,PAGE_HEIGHT=720,PAGE_COUNT=22;
 const POSITION_KEY='neomgim-rion-socks-spread';
+const COVER_KEY='neomgim-rion-socks-cover';
+const COVER_REVISION='kotori-light';
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 function savedSpread(){
  try{
+  if(new URLSearchParams(location.search).get('cover')==='1'||localStorage.getItem(COVER_KEY)!==COVER_REVISION)return -1;
   const value=Number(localStorage.getItem(POSITION_KEY)??-1);
   return Number.isInteger(value)&&value>=0&&value<PAGE_COUNT/2?value:-1;
  }catch{return -1;}
@@ -133,8 +136,12 @@ function settle(commit){
    return;
   }
   if(commit){
+   const openedCover=spread===-1;
    spread+=turn.dir;
-   try{localStorage.setItem(POSITION_KEY,String(spread));}catch{}
+   try{
+    localStorage.setItem(POSITION_KEY,String(spread));
+    if(openedCover)localStorage.setItem(COVER_KEY,COVER_REVISION);
+   }catch{}
    if(spread>0)bookSection.classList.add('has-turned');
   }
   turn=null;
