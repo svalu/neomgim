@@ -6,4 +6,113 @@
 @media(max-width:720px){.quiet-header.header{height:64px}.quiet-header .brand{font-size:17px}.quiet-header nav{font-size:11px}.flip-demo.first-book{padding:76px 0 20px;justify-content:center}.first-book .demo-stage{width:calc(100% + 24px);height:clamp(240px,48svh,440px);margin:0}.first-book .turn-hint{font-size:13px}.first-book .discover-bookshop{margin-top:24px}.first-book .demo-controls{gap:20px}}
 @media(prefers-reduced-motion:reduce){.turn-hint{transition:none}}
 
+.quiet-header .brand { color: #fff0d6; font-size: 22px; }
+.quiet-header nav a { color: #f0d5aa; font-size: 13px; }
+.flip-demo.first-book {
+  width: 100%;
+  padding: 82px 20px 22px;
+  align-items: center;
+  isolation: isolate;
+  overflow: hidden;
+  background: #201810;
+}
+.first-book::before {
+  content: '';
+  position: absolute;
+  inset: -16px;
+  z-index: -2;
+  background:
+    url('assets/library.webp') center 44% / cover no-repeat;
+  filter: blur(10px);
+}
+.first-book::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(0deg, #211b15, transparent 30%, transparent 70%, #211810a8),
+    radial-gradient(ellipse at 50% 42%, #30221928, #1d150dcc 80%);
+}
+.first-book h1 {
+  margin: 0 0 10px;
+  text-align: center;
+  font: 400 clamp(28px, 4vw, 46px)/1.3 Bookshop, serif;
+  color: #fff0d7;
+  text-shadow: 0 2px 14px #0c0804;
+}
+.first-book .demo-stage {
+  position: relative;
+  width: 100%;
+  height: clamp(260px, 58svh, 680px);
+  background: radial-gradient(ellipse at 50% 64%, #f3d1a11f, #fff5dd08 72%);
+  border: 1px solid #ecd9bc22;
+  border-radius: 22px;
+  box-shadow: inset 0 1px #fff1d810, 0 18px 45px #120b072b;
+}
+.demo-loading {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  width: min(265px, 85%);
+  margin: 0;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  font-size: 14px;
+  color: #fff0d7;
+  pointer-events: none;
+}
+.first-book .turn-hint {
+  margin: 6px 0;
+  font: 14px/1.6 Pretendard, sans-serif;
+  color: #f3d5ab;
+}
+.first-book .demo-controls {
+  gap: 5px;
+  padding: 2px 4px;
+  border: 1px solid #e4b47768;
+  border-radius: 999px;
+  background: #241a12bf;
+  backdrop-filter: blur(8px);
+}
+.first-book .demo-controls button,
+.first-book #demo-sound {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  color: #ffe3b6;
+}
+.first-book .demo-controls button:not(:disabled):hover { background: #ffe7b324; }
+.first-book .demo-controls button:disabled { opacity: .35; }
+.first-book .demo-controls button:focus-visible { outline-offset: -3px; }
+.first-book .demo-controls #demo-status { min-width: 66px; color: #ffe9c6; }
+.sample-credit {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0 16px;
+  margin: 8px 0 0;
+  color: #e3cdb0;
+  font-size: 12px;
+  text-align: center;
+}
+.sample-credit strong { color: #fff0d6; font-weight: 600; }
+.sample-credit a, .first-book .discover-bookshop {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 44px;
+  color: #f8d499;
+}
+.sample-credit a { text-decoration: underline; text-underline-offset: 4px; }
+.first-book .discover-bookshop { margin: 0; padding: 0 14px; font-size: 12px; }
+.first-book .discover-bookshop span { margin: 0; }
+@media (max-width: 720px) {
+  .quiet-header .brand { font-size: 19px; }
+  .flip-demo.first-book { padding: 68px 8px 14px; }
+  .first-book::before { background-position: 46% center; filter: blur(8px); }
+  .first-book .demo-stage { height: clamp(235px, 46svh, 420px); }
+}
+
 .platform-downloads{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:24px;scroll-margin-top:90px}.platform-download .button{width:100%;font-size:14px;padding:16px 10px;min-height:52px}.platform-download p{font:12px/1.6 Pretendard,sans-serif;color:#c9b89d;margin:9px 0 0}.windows-guide{margin-top:16px;max-width:540px;font:13px/1.8 Pretendard,sans-serif;color:#d5c6af}.windows-guide summary{cursor:pointer;min-height:44px;display:list-item;padding:10px 0}.windows-guide p{margin:8px 0}.platform-downloads~.desktop-hint{font-size:13px}@media(max-width:480px){.platform-downloads{grid-template-columns:1fr;gap:16px}.platform-download .button{font-size:15px}}
