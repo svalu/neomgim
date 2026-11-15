@@ -4,8 +4,8 @@
  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
  <meta name="theme-color" content="#211b15"><meta name="description" content="내 책을 내 책장에. 넘김 Android·Windows 앱을 다운로드하고, 설치와 업데이트를 차근차근 따라 해보세요.">
  <title>넘김 · 음... 딱 한권만...</title>
- <link rel="icon" type="image/svg+xml" href="assets/mark.svg"><link rel="stylesheet" href="style.css?v=17"><link rel="stylesheet" href="bookshop.css?v=17"><script src="app.js?v=19" defer></script><link rel="stylesheet" href="flip-demo.css?v=17"><script type="module" src="flip-demo.js?v=22"></script>
-<link rel="stylesheet" href="book-first.css?v=20"></head>
+ <link rel="icon" type="image/svg+xml" href="assets/mark.svg"><link rel="stylesheet" href="style.css?v=17"><link rel="stylesheet" href="bookshop.css?v=17"><script src="app.js?v=19" defer></script><link rel="stylesheet" href="flip-demo.css?v=17"><script type="module" src="flip-demo.js?v=27"></script>
+<link rel="stylesheet" href="book-first.css?v=21"></head>
 <body>
  <a class="skip" href="#main">본문으로</a>
  <header class="header wrap quiet-header"><a class="brand" href="#"><span>넘김</span></a><nav aria-label="주 메뉴"><a href="#downloads">다운로드 ↓</a></nav></header>
@@ -13,7 +13,7 @@
 <section class="flip-demo wrap first-book" id="try-book" aria-labelledby="flip-heading">
  <h1 id="flip-heading">음... 딱 한권만...</h1>
  <div class="demo-stage">
-  <canvas id="demo-book" tabindex="0" aria-label="《리온이와 양말 나라》 종이책 넘기기 체험. 오른쪽 페이지를 왼쪽으로 끌거나 좌우 화살표 키를 눌러 넘겨보세요." aria-describedby="demo-status"></canvas>
+  <canvas id="demo-book" tabindex="0" aria-label="《리온이와 양말 나라》 종이책 넘기기 체험. 표지를 누르거나 Enter로 펼칠 수 있어요. 좌우 화살표 키로도 넘길 수 있어요." aria-describedby="demo-status"></canvas>
   <p class="demo-loading" id="demo-loading" role="status">책을 펼치는 중…</p>
  </div>
  <p class="turn-hint">오른쪽 책장을 끌어 넘겨봐.</p>
@@ -23,7 +23,7 @@
   <button id="demo-next" aria-label="다음 두 쪽" title="다음 두 쪽" disabled>→</button>
   <button id="demo-sound" aria-label="종이 소리" title="종이 소리 끄기" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4Z M15 8c2 2 2 6 0 8 M18 5c4 4 4 10 0 14"/></svg></button>
  </div>
- <div class="sample-credit"><span><strong>《리온이와 양말 나라》</strong> · 넘김 제작</span><a href="assets/rion-socks/rion-and-the-land-of-socks.cbz" download="리온이와 양말 나라.cbz">샘플 CBZ 받기 <span aria-hidden="true">↓</span></a></div>
+ <div class="sample-credit"><span><strong>《리온이와 양말 나라》</strong> · 넘김 제작</span><a href="assets/rion-socks/rion-and-the-land-of-socks.cbz?v=kotori" download="리온이와 양말 나라.cbz">샘플 CBZ 받기 <span aria-hidden="true">↓</span></a><button id="demo-replay" type="button" hidden>표지 다시 보기</button></div>
  <a class="discover-bookshop" href="#bookshop">책방 둘러보기 <span aria-hidden="true">↓</span></a>
 </section>
   <section class="hero" id="bookshop"><img class="entrance-art" src="assets/entrance.webp" width="1672" height="941" loading="lazy" alt="고양이가 기다리는 오래된 책방 입구"><div class="hero-lamp" aria-hidden="true"></div>
