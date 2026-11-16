@@ -105,6 +105,21 @@ function drawPaperStack(x,width){
  }
 }
 
+function drawGutter(spine,stackLeft,opacity){
+ if(opacity<=0)return;
+ const radius=Math.min(16,pw*.085);
+ const gutter=ctx.createLinearGradient(spine-radius,0,spine+radius,0);
+ gutter.addColorStop(0,'#241b1300');
+ gutter.addColorStop(.5,'#241b1345');
+ gutter.addColorStop(1,'#241b1300');
+ const shadeLeft=Math.max(spine-radius,stackLeft);
+ ctx.save();
+ ctx.globalAlpha*=opacity;
+ ctx.fillStyle=gutter;
+ ctx.fillRect(shadeLeft,top,spine+radius-shadeLeft,ph);
+ ctx.restore();
+}
+
 function renderBook(){
  const turningCover=pageIndex===-1||turn?.target===-1;
  const progress=coverProgress();
@@ -132,22 +147,23 @@ function renderBook(){
   page(forward?current:turn.target,left);
   page(forward?turn.target+1:current+1,left+pw);
  }
- const gutter=ctx.createLinearGradient(left+pw-16,0,left+pw+16,0);
- gutter.addColorStop(0,'#241b1300');
- gutter.addColorStop(.5,'#241b1345');
- gutter.addColorStop(1,'#241b1300');
- ctx.fillStyle=gutter;
- const shadeLeft=Math.max(spine-16,stackLeft);
- ctx.fillRect(shadeLeft,top,spine+16-shadeLeft,ph);
- if(!turn)return;
- const forward=turn.dir===1;
- if(turningCover){
-  renderLeaf(spine,1,progress,cover);
-  return;
+ const strength=turningCover?progress:1;
+ let contact=1;
+ if(turn){
+  // Blend the binding shadow onto the moving leaf as it meets the flat spread.
+  const distance=clamp(Math.min(turn.p,1-turn.p)/.26);
+  contact=1-distance*distance*(3-2*distance);
+  drawGutter(spine,stackLeft,strength*(1-contact));
+  if(turningCover){
+   renderLeaf(spine,1,progress,cover);
+  }else{
+   const forward=turn.dir===1;
+   const front=pages[current+(forward?1:0)];
+   const back=pages[turn.target+(forward?0:1)];
+   renderLeaf(forward?spine:left,turn.dir,turn.p,front,back);
+  }
  }
- const front=pages[current+(forward?1:0)];
- const back=pages[turn.target+(forward?0:1)];
- renderLeaf(forward?left+pw:left,turn.dir,turn.p,front,back);
+ drawGutter(spine,stackLeft,strength*contact);
 }
 
 function renderLeaf(x,dir,progress,front,back){
