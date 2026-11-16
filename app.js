@@ -10,20 +10,40 @@ let stepMotion, guideRevision=0;
 let toastTimer;
 function toast(text){const node=document.querySelector('#toast');node.textContent=text;node.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>node.classList.remove('show'),5000);}
 const steps={install:[
- {title:'먼저, 설치 파일을 받아요.',copy:'아래 버튼을 누르면 GitHub에서 Android 설치 파일을 내려받아요. 받은 뒤 다음 단계로 이동해 주세요.',note:'다운로드한 파일: {file}\n책 파일은 포함되어 있지 않아요.',action:'설치 파일 다운로드',type:'download',next:'다운로드했어요 →'},
- {title:'받은 파일을 열어주세요.',copy:'휴대폰의 ‘내 파일’ 또는 ‘파일’ 앱을 열고\n다운로드 폴더에서 {file}를 눌러주세요.',note:'‘이 출처의 앱 설치 허용’이 나오면 GitHub 배포 파일인지 확인한 뒤, Android가 안내하는 해당 앱의 설치 허용을 진행해 주세요.',action:'파일을 열었어요 →'},
+ {title:'먼저, 설치 파일을 받아요.',copy:'아래 버튼을 누르면 GitHub에서 Android 설치 파일을 내려받아요. 받은 뒤 다음 단계로 이동해 주세요.',note:'다운로드한 파일: {file}\n책 파일은 포함되어 있지 않아요.',action:'설치 파일 다운로드',type:'download',next:'다운로드했어요'},
+ {title:'받은 파일을 열어주세요.',copy:'휴대폰의 ‘내 파일’ 또는 ‘파일’ 앱을 열고\n다운로드 폴더에서 {file}를 눌러주세요.',note:'‘이 출처의 앱 설치 허용’이 나오면 GitHub 배포 파일인지 확인한 뒤, Android가 안내하는 해당 앱의 설치 허용을 진행해 주세요.',action:'파일을 열었어요'},
  {title:'Android에서 설치를 확인해요.',copy:'휴대폰의 설치 화면에서 ‘설치’를 누르고,\n완료되면 ‘열기’를 눌러 넘김으로 들어가세요.',note:'이 홈페이지는 설치 완료 여부를 확인할 수 없어요. 설치 화면에서 완료를 확인해 주세요.',action:'안내 닫기',type:'close'}
 ],update:[
- {title:'앱은 지우지 마세요.',copy:'앱의 버전 번호를 누른 뒤 ‘업데이트 확인’을 선택해 주세요. 직접 설치판 0.6.41부터 홈페이지 없이 다운로드·설치 화면까지 이어져요.\n\n이 페이지에서도 새 설치 파일을 받을 수 있어요.',note:'기존 앱을 그대로 둔 채 업데이트 설치하면 책장·독서 기록·메모를 유지할 수 있어요. 앱 삭제나 데이터 초기화는 하지 마세요.',action:'새 버전 파일 다운로드',type:'download',next:'새 파일을 받았어요 →'},
- {title:'새 파일을 열어 업데이트해요.',copy:'다운로드 폴더에서 {file}를 열고, Android 설치 화면에서 ‘업데이트’ 또는 ‘설치’를 눌러주세요.',note:'설치 오류가 나도 기존 앱부터 삭제하지 마세요. 앱 버전·배포 출처·저장 공간을 확인한 뒤 다시 시도해 주세요.',action:'업데이트 화면을 확인했어요 →'},
+ {title:'앱은 지우지 마세요.',copy:'앱의 버전 번호를 누른 뒤 ‘업데이트 확인’을 선택해 주세요. 직접 설치판 0.6.41부터 홈페이지 없이 다운로드·설치 화면까지 이어져요.\n\n이 페이지에서도 새 설치 파일을 받을 수 있어요.',note:'기존 앱을 그대로 둔 채 업데이트 설치하면 책장·독서 기록·메모를 유지할 수 있어요. 앱 삭제나 데이터 초기화는 하지 마세요.',action:'새 버전 파일 다운로드',type:'download',next:'새 파일을 받았어요'},
+ {title:'새 파일을 열어 업데이트해요.',copy:'다운로드 폴더에서 {file}를 열고, Android 설치 화면에서 ‘업데이트’ 또는 ‘설치’를 눌러주세요.',note:'설치 오류가 나도 기존 앱부터 삭제하지 마세요. 앱 버전·배포 출처·저장 공간을 확인한 뒤 다시 시도해 주세요.',action:'업데이트 화면을 확인했어요'},
  {title:'앱에서 버전을 확인해요.',copy:'설치가 끝나면 넘김을 열어 버전 번호와 기존 책장·독서 기록을 확인해 주세요.',note:'이번 안내의 배포 버전은 v{version}예요. 실제 설치 완료는 Android와 앱에서 확인해 주세요.',action:'안내 닫기',type:'close'}
 ]};
 function fill(s){return s.replaceAll('{file}',`paperbook-${release.version}.apk`).replaceAll('{version}',release.version);}
-function actionButton(label,fn,secondary=false){const b=document.createElement('button');b.className=`button ${secondary?'secondary':'primary'}`;b.textContent=label;b.addEventListener('click',fn);return b;}
+function appendIcon(control,name){
+  const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.classList.add('ui-icon');
+  svg.setAttribute('viewBox','0 0 24 24');
+  svg.setAttribute('aria-hidden','true');
+  svg.setAttribute('focusable','false');
+  const use=document.createElementNS(svg.namespaceURI,'use');
+  use.setAttribute('href',`assets/hugeicons.svg#${name}`);
+  svg.append(use);
+  control.append(svg);
+}
+
+function actionButton(label,fn,secondary=false,icon='next'){
+  const button=document.createElement('button');
+  button.className=`button ${secondary?'secondary':'primary'}`;
+  button.textContent=label;
+  appendIcon(button,icon);
+  button.addEventListener('click',fn);
+  return button;
+}
 function downloadAnchor(label){
   const link=document.createElement('a');
   link.className='button primary';
   link.textContent=label;
+  appendIcon(link,'download');
   link.href=release.url;
   link.dataset.guideDownload='';
   link.addEventListener('click',()=>{
@@ -65,7 +85,7 @@ function renderStep(direction=0){
   if(data.type==='download'){
     actions.append(downloadAnchor(data.action),actionButton(data.next,()=>changeStep(step+1),true));
   }else{
-    actions.append(actionButton(data.action,()=>data.type==='close'?dialog.close():changeStep(step+1)));
+    actions.append(actionButton(data.action,()=>data.type==='close'?dialog.close():changeStep(step+1),false,data.type==='close'?'close':'next'));
   }
   if(step===1){
     const retry=downloadAnchor('파일을 다시 다운로드');

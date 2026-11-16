@@ -99,3 +99,63 @@ html:has(#guide-dialog[open], #play-test-dialog[open]) {
   }
   #toast { bottom: calc(90px + env(safe-area-inset-bottom)); }
 }
+
+.ui-icon {
+  display: block;
+  flex: none;
+  inline-size: var(--icon-size, 18px);
+  block-size: var(--icon-size, 18px);
+}
+
+.quiet-header nav a, .release-title a, .sample-credit a, footer a, footer button,
+.back-step:not([hidden]), .button {
+  align-items: center;
+  gap: 8px;
+}
+
+.quiet-header nav a, .release-title a, footer a, footer button, .back-step:not([hidden]) {
+  display: inline-flex;
+}
+
+.guide-icon { --icon-size: 24px; }
+.demo-controls button, .dialog-top .icon-button { --icon-size: 21px; }
+
+.dialog-top .icon-button {
+  display: grid;
+  place-items: center;
+  inline-size: 44px;
+  block-size: 44px;
+  padding: 0;
+}
+
+#demo-sound[aria-pressed="true"] .sound-off,
+#demo-sound[aria-pressed="false"] .sound-on { display: none; }
+
+:is(.faq-list, .demo-story, .windows-guide) summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-inline-end: 0;
+  list-style: none;
+}
+
+details summary::after, details[open] summary::after { content: none; }
+details summary::marker { content: ""; }
+
+.disclosure-icons {
+  display: grid;
+  place-items: center;
+  flex: none;
+  inline-size: 22px;
+  block-size: 22px;
+  color: var(--muted);
+}
+
+.disclosure-icons .ui-icon { grid-area: 1 / 1; }
+.disclosure-open, details[open] > summary .disclosure-closed { display: none; }
+details[open] > summary .disclosure-open { display: block; }
+
+.disclosure-body { display: flow-root; }
+.faq-list .disclosure-body { padding-block-end: 25px; }
+.faq-list .disclosure-body p { margin: 0; }
