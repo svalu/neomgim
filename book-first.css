@@ -11,24 +11,28 @@
 .flip-demo.first-book {
   width: 100%;
   padding: 82px 20px 22px;
+  justify-content: flex-start;
   align-items: center;
   isolation: isolate;
-  overflow: hidden;
-  background: #201810;
+  overflow: clip;
+  background: #211b15;
 }
 .first-book::before {
   content: '';
   position: absolute;
-  inset: -16px;
+  inset: -16px -16px auto;
+  height: calc(100svh + 32px);
   z-index: -2;
   background:
     url('assets/library.webp') center 44% / cover no-repeat;
   filter: blur(10px);
+  mask-image: linear-gradient(#000 calc(100% - 48px), transparent calc(100% - 16px));
 }
 .first-book::after {
   content: '';
   position: absolute;
-  inset: 0;
+  inset: 0 0 auto;
+  height: 100svh;
   z-index: -1;
   background:
     linear-gradient(0deg, #211b15, transparent 30%, transparent 70%, #211810a8),
@@ -151,3 +155,7 @@
 }
 
 .platform-downloads{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:24px;scroll-margin-top:90px}.platform-download .button{width:100%;font-size:14px;padding:16px 10px;min-height:52px}.platform-download p{font:12px/1.6 Pretendard,sans-serif;color:#c9b89d;margin:9px 0 0}.windows-guide{margin-top:16px;max-width:540px;font:13px/1.8 Pretendard,sans-serif;color:#d5c6af}.windows-guide summary{cursor:pointer;min-height:44px;display:list-item;padding:10px 0}.windows-guide p{margin:8px 0}.platform-downloads~.desktop-hint{font-size:13px}@media(max-width:480px){.platform-downloads{grid-template-columns:1fr;gap:16px}.platform-download .button{font-size:15px}}
+
+@media (max-width: 767px) and (orientation: portrait) {
+  .first-book .demo-stage { height: clamp(250px, 55svh, 530px); }
+}

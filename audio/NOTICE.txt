@@ -23,3 +23,5 @@ User-provided original: freesound_community-adding-books-to-a-bookshelf-26609.mp
 Derivative: 17.9–18.75s, high-pass70Hz, gain2, edge fades, mono44100Hz; playback gain0.7.
 Integrated with the app's interactive book-pulling animation; not distributed as standalone audio.
 Earlier preview excerpts v1/v2 are not shipped.
+
+splash.wav - Original synthesized opening tones mixed with the CC0 page-1.wav derivative at 0.78 s.
