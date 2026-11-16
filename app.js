@@ -1,7 +1,12 @@
 'use strict';
 const REPO='svalu/paperbook-releases';
 let release={version:'0.6.46',url:'https://github.com/svalu/paperbook-releases/releases/download/v0.6.46/paperbook-0.6.46.apk',page:'https://github.com/svalu/paperbook-releases/releases/tag/v0.6.46',bytes:33970014};
-const dialog=document.querySelector('#guide-dialog');let mode='install',step=0,opener,guideMessage='';
+const dialog=document.querySelector('#guide-dialog');
+const guideStep=dialog.querySelector('#guide-step');
+const guideTitle=dialog.querySelector('#dialog-title');
+const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
+let mode='install',step=0,opener,guideMessage='';
+let stepMotion, guideRevision=0;
 let toastTimer;
 function toast(text){const node=document.querySelector('#toast');node.textContent=text;node.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>node.classList.remove('show'),5000);}
 const steps={install:[
@@ -15,23 +20,133 @@ const steps={install:[
 ]};
 function fill(s){return s.replaceAll('{file}',`paperbook-${release.version}.apk`).replaceAll('{version}',release.version);}
 function actionButton(label,fn,secondary=false){const b=document.createElement('button');b.className=`button ${secondary?'secondary':'primary'}`;b.textContent=label;b.addEventListener('click',fn);return b;}
-function downloadAnchor(label){const a=document.createElement('a');a.className='button primary';a.textContent=label;a.href=release.url;a.addEventListener('click',()=>{guideMessage='다운로드를 요청했어요. 휴대폰의 다운로드 목록을 확인해 주세요.';setTimeout(()=>{if(dialog.open){if(step===0)step=1;renderStep();}},150);});return a;}
-function renderStep(){const data=steps[mode][step];document.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===mode)));document.querySelectorAll('.step-indicator i').forEach((n,i)=>n.classList.toggle('current',i<=step));document.querySelector('#step-label').textContent=`${mode==='install'?'처음 설치':'업데이트'} · ${step+1} / 3`;document.querySelector('#dialog-title').textContent=data.title;document.querySelector('#step-copy').textContent=fill(data.copy);const feedback=document.querySelector('#guide-feedback');feedback.textContent=guideMessage;feedback.hidden=!guideMessage;document.querySelector('#step-note').textContent=fill(data.note);const actions=document.querySelector('#step-actions');actions.replaceChildren();if(data.type==='download'){actions.append(downloadAnchor(data.action),actionButton(data.next,()=>{step++;renderStep();},true));}else actions.append(actionButton(data.action,()=>{if(data.type==='close')dialog.close();else{step++;renderStep();}}));if(step===1){const again=downloadAnchor('파일을 다시 다운로드');again.className='button secondary';actions.append(again);}const back=document.querySelector('#previous-step');back.hidden=step===0;document.querySelector('#dialog-title').focus();}
-function openGuide(kind,start=0,message=''){opener=document.activeElement;mode=kind;step=start;guideMessage=message;if(!dialog.open)dialog.showModal();renderStep();}
-document.querySelectorAll('[data-open]').forEach(b=>b.addEventListener('click',()=>openGuide(b.dataset.open)));
-document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>{mode=b.dataset.mode;step=0;guideMessage='';renderStep();}));
-document.querySelector('#close-guide').addEventListener('click',()=>dialog.close());
-document.querySelector('#previous-step').addEventListener('click',()=>{step=Math.max(0,step-1);renderStep();});
-dialog.addEventListener('close',()=>opener?.focus());
-dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)dialog.close();}});
-document.querySelectorAll('.download').forEach(a=>a.addEventListener('click',()=>{openGuide('install',1,'다운로드를 요청했어요. 휴대폰의 다운로드 목록을 확인해 주세요.');}));
+function downloadAnchor(label){
+  const link=document.createElement('a');
+  link.className='button primary';
+  link.textContent=label;
+  link.href=release.url;
+  link.dataset.guideDownload='';
+  link.addEventListener('click',()=>{
+    const revision=guideRevision;
+    setTimeout(()=>{
+      if(!dialog.open||revision!==guideRevision)return;
+      guideMessage='다운로드를 요청했어요. 휴대폰의 다운로드 목록을 확인해 주세요.';
+      if(step===0)changeStep(1);
+      else updateGuideFeedback();
+    },150);
+  });
+  return link;
+}
+
+function updateGuideRelease(){
+  const data=steps[mode][step];
+  dialog.querySelector('#step-copy').textContent=fill(data.copy);
+  dialog.querySelector('#step-note').textContent=fill(data.note);
+  dialog.querySelectorAll('[data-guide-download]').forEach(link=>link.href=release.url);
+}
+
+function updateGuideFeedback(){
+  const feedback=dialog.querySelector('#guide-feedback');
+  feedback.textContent=guideMessage;
+  feedback.hidden=!guideMessage;
+}
+
+function renderStep(direction=0){
+  guideRevision++;
+  const data=steps[mode][step];
+  dialog.querySelectorAll('[data-mode]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.mode===mode)));
+  dialog.querySelectorAll('.step-indicator i').forEach((bar,index)=>bar.classList.toggle('current',index<=step));
+  dialog.querySelector('#step-label').textContent=`${mode==='install'?'처음 설치':'업데이트'} · ${step+1} / 3`;
+  guideTitle.textContent=data.title;
+  updateGuideFeedback();
+
+  const actions=dialog.querySelector('#step-actions');
+  actions.replaceChildren();
+  if(data.type==='download'){
+    actions.append(downloadAnchor(data.action),actionButton(data.next,()=>changeStep(step+1),true));
+  }else{
+    actions.append(actionButton(data.action,()=>data.type==='close'?dialog.close():changeStep(step+1)));
+  }
+  if(step===1){
+    const retry=downloadAnchor('파일을 다시 다운로드');
+    retry.className='button secondary';
+    actions.append(retry);
+  }
+  dialog.querySelector('#previous-step').hidden=step===0;
+  updateGuideRelease();
+
+  stepMotion?.cancel();
+  if(direction&&!reducedMotion.matches){
+    stepMotion=guideStep.animate(
+      [{opacity:.4,translate:`${direction*9}px 0`},{opacity:1,translate:'0 0'}],
+      {duration:180,easing:'ease-out'}
+    );
+  }
+  dialog.scrollTop=0;
+  guideTitle.focus({preventScroll:true});
+}
+
+function changeStep(target){
+  const direction=Math.sign(target-step);
+  step=target;
+  renderStep(direction);
+}
+
+function openGuide(kind,start=0,message='',trigger=document.activeElement){
+  if(!dialog.open)opener=trigger;
+  mode=kind;
+  step=start;
+  guideMessage=message;
+  if(!dialog.open)dialog.showModal();
+  renderStep();
+}
+
+function closeOnBackdrop(modal){
+  modal.addEventListener('click',event=>{
+    if(event.target!==modal)return;
+    const bounds=modal.getBoundingClientRect();
+    if(event.clientX<bounds.left||event.clientX>bounds.right||event.clientY<bounds.top||event.clientY>bounds.bottom)modal.close();
+  });
+}
+
+document.querySelectorAll('[data-open]').forEach(button=>button.addEventListener('click',()=>openGuide(button.dataset.open)));
+dialog.querySelectorAll('[data-mode]').forEach(button=>button.addEventListener('click',()=>{
+  const selected=button.dataset.mode;
+  if(selected===mode)return;
+  mode=selected;
+  guideMessage='';
+  step=0;
+  renderStep(selected==='update'?1:-1);
+}));
+dialog.querySelector('#close-guide').addEventListener('click',()=>dialog.close());
+dialog.querySelector('#previous-step').addEventListener('click',()=>changeStep(Math.max(0,step-1)));
+dialog.addEventListener('close',()=>{
+  if(dialog.open)return;
+  stepMotion?.cancel();
+  opener?.focus({preventScroll:true});
+});
+closeOnBackdrop(dialog);
+document.querySelectorAll('.download').forEach(link=>link.addEventListener('click',event=>{
+  if(event.altKey||event.ctrlKey||event.metaKey||event.shiftKey)return;
+  openGuide('install',1,'다운로드를 요청했어요. 휴대폰의 다운로드 목록을 확인해 주세요.',link);
+}));
 document.querySelectorAll('[data-share]').forEach(b=>b.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(location.href.split('#')[0]);toast('페이지 링크를 복사했어요. 휴대폰으로 보내주세요.');}catch{toast('주소창의 페이지 주소를 복사해 주세요.');}}));
 if(!/Android/i.test(navigator.userAgent))document.querySelector('.desktop-hint').hidden=false;
-async function refreshRelease(){const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),8000);try{const response=await fetch(`https://api.github.com/repos/${REPO}/releases/latest`,{signal:controller.signal,headers:{Accept:'application/vnd.github+json'}});if(!response.ok)throw new Error('release unavailable');const data=await response.json();if(data.draft||data.prerelease||typeof data.tag_name!=='string'||!/^v?\d+\.\d+\.\d+$/.test(data.tag_name))throw new Error('invalid release');const asset=data.assets?.find(a=>typeof a.name==='string'&&/^paperbook-[\d.]+\.apk$/.test(a.name));if(!asset)throw new Error('missing apk');const apk=new URL(asset.browser_download_url),page=new URL(data.html_url);if(apk.origin!=='https://github.com'||!apk.pathname.startsWith(`/${REPO}/releases/download/`)||page.origin!=='https://github.com'||!page.pathname.startsWith(`/${REPO}/releases/tag/`))throw new Error('unexpected source');release={version:data.tag_name.replace(/^v/,''),url:apk.href,page:page.href,bytes:asset.size};document.querySelectorAll('.download').forEach(a=>a.href=release.url);document.querySelectorAll('.version').forEach(n=>n.textContent=`v${release.version}`);document.querySelectorAll('.apk-name').forEach(n=>n.textContent=asset.name);document.querySelectorAll('.file-size').forEach(n=>n.textContent=`${(release.bytes/1048576).toFixed(1)} MB`);document.querySelector('#release-link').href=release.page;const date=new Date(data.published_at);document.querySelector('#release-date').textContent=Number.isNaN(date.getTime())?'':new Intl.DateTimeFormat('ko-KR',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).format(date);const bullets=String(data.body??'').split(/\r?\n/).filter(l=>/^[-*] /.test(l)).slice(0,5);if(bullets.length){const ul=document.querySelector('#release-notes');ul.replaceChildren(...bullets.map(s=>{const li=document.createElement('li');li.textContent=s.slice(2);return li;}));}document.querySelector('#release-status').textContent='Android 최신 배포 버전을 확인했어요.';if(dialog.open)renderStep();}catch{document.querySelector('#release-status').textContent='최신 정보 확인이 어려워요. 2026.11.15 확인한 버전이며, 전체 배포 기록에서 최신판을 확인해 주세요.';}finally{clearTimeout(timer);}}
+async function refreshRelease(){const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),8000);try{const response=await fetch(`https://api.github.com/repos/${REPO}/releases/latest`,{signal:controller.signal,headers:{Accept:'application/vnd.github+json'}});if(!response.ok)throw new Error('release unavailable');const data=await response.json();if(data.draft||data.prerelease||typeof data.tag_name!=='string'||!/^v?\d+\.\d+\.\d+$/.test(data.tag_name))throw new Error('invalid release');const asset=data.assets?.find(a=>typeof a.name==='string'&&/^paperbook-[\d.]+\.apk$/.test(a.name));if(!asset)throw new Error('missing apk');const apk=new URL(asset.browser_download_url),page=new URL(data.html_url);if(apk.origin!=='https://github.com'||!apk.pathname.startsWith(`/${REPO}/releases/download/`)||page.origin!=='https://github.com'||!page.pathname.startsWith(`/${REPO}/releases/tag/`))throw new Error('unexpected source');release={version:data.tag_name.replace(/^v/,''),url:apk.href,page:page.href,bytes:asset.size};document.querySelectorAll('.download').forEach(a=>a.href=release.url);document.querySelectorAll('.version').forEach(n=>n.textContent=`v${release.version}`);document.querySelectorAll('.apk-name').forEach(n=>n.textContent=asset.name);document.querySelectorAll('.file-size').forEach(n=>n.textContent=`${(release.bytes/1048576).toFixed(1)} MB`);document.querySelector('#release-link').href=release.page;const date=new Date(data.published_at);document.querySelector('#release-date').textContent=Number.isNaN(date.getTime())?'':new Intl.DateTimeFormat('ko-KR',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).format(date);const bullets=String(data.body??'').split(/\r?\n/).filter(l=>/^[-*] /.test(l)).slice(0,5);if(bullets.length){const ul=document.querySelector('#release-notes');ul.replaceChildren(...bullets.map(s=>{const li=document.createElement('li');li.textContent=s.slice(2);return li;}));}document.querySelector('#release-status').textContent='Android 최신 배포 버전을 확인했어요.';if(dialog.open)updateGuideRelease();}catch{document.querySelector('#release-status').textContent='최신 정보 확인이 어려워요. 2026.11.15 확인한 버전이며, 전체 배포 기록에서 최신판을 확인해 주세요.';}finally{clearTimeout(timer);}}
 void refreshRelease();
 
 const playTestDialog=document.querySelector('#play-test-dialog');
-document.querySelector('#open-play-test').addEventListener('click',()=>{playTestDialog.showModal();document.querySelector('#play-test-title').focus();});
-document.querySelector('#close-play-test').addEventListener('click',()=>playTestDialog.close());
-playTestDialog.addEventListener('close',()=>document.querySelector('#open-play-test').focus());
-document.querySelector('#test-use-apk').addEventListener('click',()=>{playTestDialog.close();openGuide('install');});
+const playTestButton=document.querySelector('#open-play-test');
+playTestButton.addEventListener('click',()=>{
+  playTestDialog.showModal();
+  playTestDialog.querySelector('#play-test-title').focus({preventScroll:true});
+});
+playTestDialog.querySelector('#close-play-test').addEventListener('click',()=>playTestDialog.close());
+closeOnBackdrop(playTestDialog);
+playTestDialog.addEventListener('close',()=>{
+  if(!dialog.open)playTestButton.focus({preventScroll:true});
+});
+playTestDialog.querySelector('#test-use-apk').addEventListener('click',()=>{
+  playTestDialog.close();
+  openGuide('install',0,'',playTestButton);
+});
