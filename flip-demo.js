@@ -1,4 +1,4 @@
-import {drawPaperLeaf} from './paper-leaf.js';
+import {drawPaperLeaf} from './paper-leaf.js?v=3';
 import {RecordedPage} from './page-audio.js';
 import {storyLines} from './rion-story.js?v=1';
 
@@ -108,12 +108,22 @@ function drawPaperStack(x,width){
 function renderBook(){
  const turningCover=pageIndex===-1||turn?.target===-1;
  const progress=coverProgress();
- const stackLeft=left+pw*(1-progress);
+ const spine=left+pw;
+ const leftReveal=turningCover?Math.max(0,-Math.cos(progress*Math.PI)):1;
+ const stackLeft=spine-pw*leftReveal;
  drawPaperStack(stackLeft,left+2*pw-stackLeft);
  const current=pageIndex;
  if(turningCover){
-  if(progress===0){page(-1,left+pw);return;}
-  page(1,left+pw);
+  if(progress===0){page(-1,spine);return;}
+  page(1,spine);
+  if(leftReveal>0){
+   ctx.save();
+   ctx.beginPath();
+   ctx.rect(stackLeft,top,spine-stackLeft,ph);
+   ctx.clip();
+   page(0,left);
+   ctx.restore();
+  }
  }else if(!turn){
   page(current,left);
   page(current+1,left+pw);
@@ -127,11 +137,12 @@ function renderBook(){
  gutter.addColorStop(.5,'#241b1345');
  gutter.addColorStop(1,'#241b1300');
  ctx.fillStyle=gutter;
- ctx.fillRect(left+pw-16,top,32,ph);
+ const shadeLeft=Math.max(spine-16,stackLeft);
+ ctx.fillRect(shadeLeft,top,spine+16-shadeLeft,ph);
  if(!turn)return;
  const forward=turn.dir===1;
  if(turningCover){
-  renderLeaf(left+pw,1,progress,cover,pages[0]);
+  renderLeaf(spine,1,progress,cover);
   return;
  }
  const front=pages[current+(forward?1:0)];

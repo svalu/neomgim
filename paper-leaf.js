@@ -48,6 +48,7 @@ function path(ctx, points, close = true, offsetX = 0) {
   if (close) ctx.closePath();
 }
 
+// An omitted verso is transparent. A null verso uses the splash paper color.
 export function drawPaperLeaf(ctx, rect, side, progress, front, back, { clipped = false, strips = 32, rows = 6 } = {}) {
   const { points, camera } = paperFrame(rect, side, progress, 0, clipped, strips, rows);
   const bend = Math.sin(progress * Math.PI);
@@ -57,6 +58,7 @@ export function drawPaperLeaf(ctx, rect, side, progress, front, back, { clipped 
   ctx.fill();
 
   const cells = [];
+  let frontEdgeVisible = false;
   for (let col = 0; col < strips; col++) {
     for (let row = 0; row < rows; row++) {
       const a = points[col][row], b = points[col + 1][row];
@@ -70,6 +72,8 @@ export function drawPaperLeaf(ctx, rect, side, progress, front, back, { clipped 
   cells.sort((a, b) => a.center.z - b.center.z);
   for (const { col, row, corners, normal, center } of cells) {
     const isBack = paperFacing(normal, center, camera) < 0;
+    if (isBack && back === undefined) continue;
+    if (!isBack && col === strips - 1) frontEdgeVisible = true;
     const image = isBack ? back : front;
     const lighting = Math.max(0, (isBack ? -1 : 1) * (-.3 * normal.x - .4 * normal.y + normal.z) / Math.sqrt(1.25));
     const darkness = bend * (.09 + .25 * (1 - lighting));
@@ -92,15 +96,16 @@ export function drawPaperLeaf(ctx, rect, side, progress, front, back, { clipped 
     drawTriangle(ctx, image, shade, [tl, br, bl], [a, c, d]);
   }
 
+  if (back === undefined && !frontEdgeVisible) return;
   const edge = points.at(-1).map(point => projectPaper(point, camera));
   ctx.save();
   ctx.globalAlpha *= bend;
   ctx.lineWidth = 2.4;
-  ctx.strokeStyle = back ? '#71563d' : '#352218';
+  ctx.strokeStyle = back === null ? '#352218' : '#71563d';
   path(ctx, edge, false);
   ctx.stroke();
   ctx.lineWidth = 1;
-  ctx.strokeStyle = back ? '#f7e6c7' : '#9a6e49';
+  ctx.strokeStyle = back === null ? '#9a6e49' : '#f7e6c7';
   path(ctx, edge, false, -side * .6);
   ctx.stroke();
   ctx.restore();
