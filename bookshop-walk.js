@@ -156,6 +156,17 @@ function playSound() {
   splashAudio.play().then(start, start);
 }
 
+function playSoundOnTap() {
+  if (!splashAudio.paused || sheet.classList.contains('is-turning')) return;
+  if (soundToggle.getAttribute('aria-pressed') === 'false') return;
+
+  clearTimeout(audioDeadline);
+  clearTimeout(turnTimer);
+  clearTimeout(finishTimer);
+  sheet.classList.remove('is-playing');
+  playSound();
+}
+
 function closeSplash() {
   if (!splash.open) return;
   clearTimeout(audioDeadline);
@@ -188,6 +199,7 @@ if (typeof splash.showModal === 'function') {
       showSplash(true);
     });
   }
+  splash.addEventListener('click', playSoundOnTap);
   splash.addEventListener('cancel', event => { event.preventDefault(); closeSplash(); });
   sheet.addEventListener('animationend', event => {
     if (event.target === sheet && event.animationName === 'splash-clear') closeSplash();
