@@ -5,15 +5,16 @@ import {storyLines} from './rion-story.js?v=1';
 const canvas=document.querySelector('#demo-book'),ctx=canvas.getContext('2d');
 const prev=document.querySelector('#demo-prev'),next=document.querySelector('#demo-next'),soundButton=document.querySelector('#demo-sound'),status=document.querySelector('#demo-status');
 const loading=document.querySelector('#demo-loading');
-const hint=document.querySelector('.turn-hint'),bookSection=document.querySelector('#try-book'),replay=document.querySelector('#demo-replay');
+const hint=document.querySelector('.turn-hint'),bookSection=document.querySelector('#try-book');
 const storyDetails=document.querySelector('#demo-story'),storyText=document.querySelector('#demo-story-text');
 const PAGE_WIDTH=480,PAGE_HEIGHT=720,PAGE_COUNT=22;
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 const compactPortrait=matchMedia('(max-width: 767px) and (orientation: portrait)');
-let pageIndex=-1,cover=null,ready=false,turn=null,drag=null,raf=0,pages=[],W=1,H=1,pw=1,ph=1,left=0,top=0,coverWidth=1,soundOn=true,audio,recorded,output;
-const coverShift=()=>pageIndex===-1?-pw*.5*(1-(turn?.p??0)):0;
-const coverScale=()=>pageIndex===-1?1+(coverWidth/pw-1)*(1-(turn?.p??0)):1;
-const nextPage=dir=>pageIndex===-1?0:pageIndex+dir*2;
+let pageIndex=0,cover=null,ready=false,turn=null,drag=null,raf=0,pages=[],W=1,H=1,pw=1,ph=1,left=0,top=0,coverWidth=1,soundOn=true,audio,recorded,output;
+const coverProgress=()=>turn?.target===-1?1-turn.p:pageIndex===-1?(turn?.p??0):1;
+const coverShift=()=>-pw*.5*(1-coverProgress());
+const coverScale=()=>1+(coverWidth/pw-1)*(1-coverProgress());
+const nextPage=dir=>pageIndex===-1?0:Math.max(-1,pageIndex+dir*2);
 const imageAt=index=>index===-1?cover:pages[index];
 const clamp=x=>Math.max(0,Math.min(1,x));
 function prepareAudio(){try{if(!audio){audio=new AudioContext();output=audio.createGain();output.gain.value=.42;output.connect(audio.destination);recorded=new RecordedPage(audio,output);}recorded.prepare().catch(()=>{});}catch{soundButton.setAttribute('aria-label','소리 사용 불가');soundButton.disabled=true;}}
@@ -36,9 +37,9 @@ async function loadComic(){
   pages[index]=pair[0];
   pages[index+1]=pair[1];
  }
+ void loadImage('splash-cover-kotori-light').then(image=>{cover=image;update();}).catch(()=>{});
  try{
-  [cover]=await Promise.all([loadImage('splash-cover-kotori-light').catch(()=>null),loadSpread(0)]);
-  if(!cover)pageIndex=0;
+  await loadSpread(0);
   ready=true;
   loading.hidden=true;
   render();
@@ -105,13 +106,13 @@ function drawPaperStack(x,width){
 }
 
 function renderBook(){
- const opening=pageIndex===-1;
- const coverProgress=opening?(turn?.p??0):1;
- const stackLeft=opening?left+pw*(1-coverProgress):left;
+ const turningCover=pageIndex===-1||turn?.target===-1;
+ const progress=coverProgress();
+ const stackLeft=left+pw*(1-progress);
  drawPaperStack(stackLeft,left+2*pw-stackLeft);
  const current=pageIndex;
- if(opening){
-  if(!turn){page(-1,left+pw);return;}
+ if(turningCover){
+  if(progress===0){page(-1,left+pw);return;}
   page(1,left+pw);
  }else if(!turn){
   page(current,left);
@@ -129,18 +130,22 @@ function renderBook(){
  ctx.fillRect(left+pw-16,top,32,ph);
  if(!turn)return;
  const forward=turn.dir===1;
- const front=opening?cover:pages[current+(forward?1:0)];
- const back=opening?pages[0]:pages[turn.target+(forward?0:1)];
- renderLeaf(forward?left+pw:left,front,back);
+ if(turningCover){
+  renderLeaf(left+pw,1,progress,cover,pages[0]);
+  return;
+ }
+ const front=pages[current+(forward?1:0)];
+ const back=pages[turn.target+(forward?0:1)];
+ renderLeaf(forward?left+pw:left,turn.dir,turn.p,front,back);
 }
 
-function renderLeaf(x,front,back){
- drawPaperLeaf(ctx,{x,y:top,w:pw,h:ph},turn.dir,turn.p,front,back);
+function renderLeaf(x,dir,progress,front,back){
+ drawPaperLeaf(ctx,{x,y:top,w:pw,h:ph},dir,progress,front,back);
 }
 function canTurn(dir){
  if(!ready||turn||(dir<0&&pageIndex<0))return false;
  const target=nextPage(dir);
- return target>=0&&!!pages[target]&&!!pages[target+1];
+ return target===-1?!!cover:!!pages[target]&&!!pages[target+1];
 }
 function updateStoryText(){
  const first=pageIndex-2;
@@ -160,9 +165,7 @@ function updateStoryText(){
 function update(){
  const closed=pageIndex===-1;
  const current=pageIndex;
- const canClose=ready&&!closed&&!!cover&&!turn;
- const returnToCover=current===0&&canClose;
- prev.disabled=!returnToCover&&!canTurn(-1);
+ prev.disabled=!canTurn(-1);
  prev.title=current===0&&cover?'이전: 표지':'이전 두 쪽';
  prev.setAttribute('aria-label',prev.title);
  next.disabled=!canTurn(1);
@@ -170,19 +173,18 @@ function update(){
  next.setAttribute('aria-label',next.title);
  bookSection.toggleAttribute('data-cover',closed);
  updateStoryText();
- replay.disabled=!canClose;
- hint.textContent=closed?'표지를 누르거나 왼쪽으로 밀어봐.':'오른쪽 책장을 끌어 넘겨봐.';
+ hint.textContent=closed?'표지를 누르거나 왼쪽으로 밀어봐.':'책장을 좌우로 밀어 넘겨봐.';
  if(!ready)return;
  const number=`${current+1}–${current+2}`;
  const label=closed?'표지':`${number} / ${PAGE_COUNT}쪽`;
  if(status.textContent!==label)status.textContent=label;
 }
 function start(dir){if(!canTurn(dir))return false;turn={dir,target:nextPage(dir),p:0,sounded:false};update();return true;}
-function settle(commit){
+function settle(commit,focusNextOnCover=false){
  if(!turn)return;
  cancelAnimationFrame(raf);
  const from=turn.p,target=commit?1:0,startAt=performance.now();
- const duration=reduced.matches?0:Math.max(150,(pageIndex===-1?560:480)*Math.abs(target-from));
+ const duration=reduced.matches?0:Math.max(150,(pageIndex===-1||turn.target===-1?560:480)*Math.abs(target-from));
  if(commit&&!turn.sounded)soundStart();
  const tick=now=>{
   if(!turn)return;
@@ -203,25 +205,16 @@ function settle(commit){
   recorded?.end(commit&&soundOn);
   render();
   update();
+  if(commit&&pageIndex===-1&&focusNextOnCover) next.focus({preventScroll:true});
  };
  raf=requestAnimationFrame(tick);
 }
-function flip(dir){unlock();if(start(dir))settle(true);}
-function goToCover(focusNext){
- if(!ready||!cover||pageIndex<0||turn)return;
- pageIndex=-1;
- bookSection.classList.remove('has-turned');
- render();
- update();
- if(focusNext)next.focus({preventScroll:true});
-}
-function previous(focusNext){if(pageIndex===0)goToCover(focusNext);else flip(-1);}
-prev.onclick=()=>previous(true);
+function flip(dir,focusNextOnCover=false){unlock();if(start(dir))settle(true,focusNextOnCover);}
+prev.onclick=()=>flip(-1,true);
 next.onclick=()=>flip(1);
-replay.onclick=()=>goToCover(true);
 canvas.addEventListener('keydown',e=>{
  if(pageIndex===-1&&(e.key==='Enter'||e.key===' ')){e.preventDefault();flip(1);}
- else if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.preventDefault();if(e.key==='ArrowRight')flip(1);else previous(false);}
+ else if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.preventDefault();if(e.key==='ArrowRight')flip(1);else flip(-1);}
 });
 canvas.addEventListener('pointerdown',e=>{
  if(!ready||turn||drag||!e.isPrimary||e.button!==0)return;
