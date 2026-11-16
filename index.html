@@ -4,11 +4,11 @@
  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
  <meta name="theme-color" content="#211b15"><meta name="description" content="내 책을 내 책장에. 넘김 Android·Windows 앱을 다운로드하고, 설치와 업데이트를 차근차근 따라 해보세요.">
  <title>넘김 · 음... 딱 한권만...</title>
- <link rel="icon" type="image/svg+xml" href="assets/mark.svg"><link rel="stylesheet" href="style.css?v=17"><link rel="stylesheet" href="bookshop.css?v=17"><script src="app.js?v=21" defer></script><link rel="stylesheet" href="flip-demo.css?v=18"><script type="module" src="flip-demo.js?v=40"></script>
-<link rel="stylesheet" href="book-first.css?v=29">
+ <link rel="icon" type="image/svg+xml" href="assets/mark.svg"><link rel="stylesheet" href="style.css?v=17"><link rel="stylesheet" href="bookshop.css?v=17"><script src="app.js?v=21" defer></script><link rel="stylesheet" href="flip-demo.css?v=18"><script type="module" src="flip-demo.js?v=41"></script>
+<link rel="stylesheet" href="book-first.css?v=30">
  <link rel="stylesheet" href="bookshop-walk.css?v=15">
  <script type="module" src="bookshop-walk.js?v=18"></script>
- <link rel="stylesheet" href="interactions.css?v=2">
+ <link rel="stylesheet" href="interactions.css?v=3">
 </head>
 <body>
  <a class="skip" href="#main">본문으로</a>
@@ -27,9 +27,13 @@
  <main id="main">
 <section class="flip-demo wrap first-book" id="try-book" aria-labelledby="flip-heading">
  <h1 id="flip-heading" tabindex="-1">음... 딱 한권만...</h1>
+ <div id="demo-reader-home" class="demo-reader-home">
+ <div id="demo-reader" class="demo-reader">
+ <div class="demo-stage-scroll">
  <div class="demo-stage">
   <canvas id="demo-book" tabindex="0" aria-label="《리온이와 양말 나라》 종이책 넘기기 체험. 표지를 누르거나 Enter로 펼칠 수 있어요. 좌우 화살표 키로도 넘길 수 있어요." aria-describedby="demo-status"></canvas>
   <p class="demo-loading" id="demo-loading" role="status">책을 펼치는 중…</p>
+ </div>
  </div>
  <p class="turn-hint">책장을 좌우로 밀어 넘겨봐.</p>
  <div class="demo-controls">
@@ -38,10 +42,21 @@
   <button id="demo-next" aria-label="다음 두 쪽" title="다음 두 쪽" disabled><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="assets/hugeicons.svg#next"></use></svg></button>
   <button id="demo-sound" aria-label="종이 소리" title="종이 소리 끄기" aria-pressed="true"><svg class="ui-icon sound-on" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="assets/hugeicons.svg#volume"></use></svg><svg class="ui-icon sound-off" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="assets/hugeicons.svg#mute"></use></svg></button>
  </div>
+ </div>
+ </div>
+ <div id="demo-reading-options" class="demo-reading-options" hidden>
  <details id="demo-story" class="demo-story" hidden>
   <summary>글 크게 보기<span class="disclosure-icons" aria-hidden="true"><svg class="ui-icon disclosure-closed" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="assets/hugeicons.svg#add"></use></svg><svg class="ui-icon disclosure-open" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="assets/hugeicons.svg#minus"></use></svg></span></summary>
   <div id="demo-story-text" class="disclosure-body"></div>
  </details>
+ <button id="demo-enlarge" class="demo-view-button" type="button" aria-haspopup="dialog">책 크게 보기<svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="assets/hugeicons.svg#external"></use></svg></button>
+ </div>
+ <dialog id="demo-expanded" class="demo-expanded" aria-label="리온이와 양말 나라 크게 보기">
+  <div class="demo-expanded-top">
+   <span class="demo-pan-hint">좌우로 움직여 두 쪽을 볼 수 있어.</span>
+   <button id="demo-shrink" class="demo-view-button" type="button" autofocus>닫기<svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="assets/hugeicons.svg#close"></use></svg></button>
+  </div>
+ </dialog>
  <div class="sample-credit"><span><strong>《리온이와 양말 나라》</strong> · 넘김 제작</span><a href="assets/rion-socks/rion-and-the-land-of-socks-story.cbz?v=2" download="리온이와 양말 나라.cbz">샘플 CBZ 받기 <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="assets/hugeicons.svg#download"></use></svg></a></div>
  <a class="discover-bookshop" href="#bookshop">책방 둘러보기 <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="assets/hugeicons.svg#down"></use></svg></a>
 </section>

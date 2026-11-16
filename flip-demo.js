@@ -7,6 +7,11 @@ const prev=document.querySelector('#demo-prev'),next=document.querySelector('#de
 const loading=document.querySelector('#demo-loading');
 const hint=document.querySelector('.turn-hint'),bookSection=document.querySelector('#try-book');
 const storyDetails=document.querySelector('#demo-story'),storyText=document.querySelector('#demo-story-text');
+const readingOptions=document.querySelector('#demo-reading-options');
+const readerHome=document.querySelector('#demo-reader-home'),reader=document.querySelector('#demo-reader');
+const expanded=document.querySelector('#demo-expanded'),enlarge=document.querySelector('#demo-enlarge');
+const stageScroll=reader.querySelector('.demo-stage-scroll');
+let readerScrollY=0;
 const PAGE_WIDTH=480,PAGE_HEIGHT=720,PAGE_COUNT=22;
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 const compactPortrait=matchMedia('(max-width: 767px) and (orientation: portrait)');
@@ -20,6 +25,11 @@ const coverScale=()=>1+(coverWidth/pw-1)*(1-coverProgress());
 const nextPage=dir=>pageIndex===FRONT_COVER?0:Math.max(FRONT_COVER,pageIndex+dir*2);
 const imageAt=index=>index===FRONT_COVER?cover:index===BACK_COVER?backCover:pages[index];
 const clamp=x=>Math.max(0,Math.min(1,x));
+const pansSpread=()=>expanded.open&&compactPortrait.matches;
+function alignExpandedSpread(){
+ if(!pansSpread())return;
+ stageScroll.scrollLeft=isCover(pageIndex)?(stageScroll.scrollWidth-stageScroll.clientWidth)/2:0;
+}
 function prepareAudio(){try{if(!audio){audio=new AudioContext();output=audio.createGain();output.gain.value=.42;output.connect(audio.destination);recorded=new RecordedPage(audio,output);}recorded.prepare().catch(()=>{});}catch{soundButton.setAttribute('aria-label','소리 사용 불가');soundButton.disabled=true;}}
 function unlock(){prepareAudio();if(soundOn&&audio)audio.resume().catch(()=>{});}
 function soundStart(){if(soundOn&&recorded){recorded.begin();if(turn)turn.sounded=true;}}
@@ -73,9 +83,11 @@ function resize(){
  ph=Math.min(H*.94,Math.max(1,W-20)*PAGE_HEIGHT/(2*PAGE_WIDTH));
  pw=ph*PAGE_WIDTH/PAGE_HEIGHT;
  left=(W-pw*2)/2;
- coverWidth=compactPortrait.matches?Math.max(pw,Math.min(W-20,H*.94*PAGE_WIDTH/PAGE_HEIGHT)):pw;
+ const coverViewport=pansSpread()?stageScroll.clientWidth:W;
+ coverWidth=compactPortrait.matches?Math.max(pw,Math.min(coverViewport-20,H*.94*PAGE_WIDTH/PAGE_HEIGHT)):pw;
  top=(H-ph)/2;
  render();
+ if(isCover(pageIndex))alignExpandedSpread();
 }
 function page(index,x){ctx.drawImage(imageAt(index),x,top,pw,ph);}
 function render(){
@@ -207,6 +219,7 @@ function update(){
  next.title=current===FRONT_COVER?'책 펼치기':current===PAGE_COUNT-2&&backCover?'다음: 뒤표지':'다음 두 쪽';
  next.setAttribute('aria-label',next.title);
  bookSection.toggleAttribute('data-cover',closed);
+ readingOptions.hidden=!ready;
  updateStoryText();
  hint.textContent=closed
   ?current===BACK_COVER?'뒤표지를 누르거나 오른쪽으로 밀어봐.':'표지를 누르거나 왼쪽으로 밀어봐.'
@@ -242,6 +255,7 @@ function settle(commit,focusOnCover=false){
   recorded?.end(commit&&soundOn);
   render();
   update();
+  if(commit)alignExpandedSpread();
   if(commit&&isCover(pageIndex)&&focusOnCover)(pageIndex===BACK_COVER?prev:next).focus({preventScroll:true});
  };
  raf=requestAnimationFrame(tick);
@@ -254,7 +268,7 @@ canvas.addEventListener('keydown',e=>{
  else if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.preventDefault();if(e.key==='ArrowRight')flip(1);else flip(-1);}
 });
 canvas.addEventListener('pointerdown',e=>{
- if(!ready||turn||drag||!e.isPrimary||e.button!==0)return;
+ if(pansSpread()||!ready||turn||drag||!e.isPrimary||e.button!==0)return;
  const rect=canvas.getBoundingClientRect(),scale=coverScale();
  const x=(e.clientX-rect.left-W/2)/scale+W/2-coverShift();
  const y=(e.clientY-rect.top-H/2)/scale+H/2;
@@ -304,6 +318,43 @@ function resetTurn(){
  drag=null;
  recorded?.end();
 }
+enlarge.addEventListener('click',()=>{
+ readerScrollY=window.scrollY;
+ readerHome.style.minHeight=`${reader.offsetHeight}px`;
+ resetTurn();
+ expanded.showModal();
+ expanded.append(reader);
+ resize();
+ update();
+ alignExpandedSpread();
+});
+function restoreReader(){
+ if(expanded.open||reader.parentElement===readerHome)return;
+ resetTurn();
+ readerHome.append(reader);
+ readerHome.style.removeProperty('min-height');
+ resize();
+ update();
+ enlarge.focus({preventScroll:true});
+ window.scrollTo({top:readerScrollY,behavior:'instant'});
+}
+function closeExpanded(){
+ expanded.close();
+ restoreReader();
+}
+document.querySelector('#demo-shrink').addEventListener('click',closeExpanded);
+expanded.addEventListener('cancel',e=>{
+ e.preventDefault();
+ closeExpanded();
+});
+expanded.addEventListener('close',restoreReader);
+expanded.addEventListener('keydown',e=>{
+ if(e.defaultPrevented||e.altKey||e.ctrlKey||e.metaKey)return;
+ if(e.key==='ArrowRight'||e.key==='ArrowLeft'){
+  e.preventDefault();
+  flip(e.key==='ArrowRight'?1:-1);
+ }
+});
 document.addEventListener('visibilitychange',()=>{
  if(document.hidden){resetTurn();render();update();}
 });
