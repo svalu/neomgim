@@ -75,7 +75,7 @@
 }
 .first-book .demo-controls {
   gap: 5px;
-  padding: 2px 4px;
+  padding: 0 2px;
   border: 1px solid #e4b47768;
   border-radius: 999px;
   background: #241a12bf;
@@ -89,6 +89,7 @@
   min-height: 44px;
   color: #ffe3b6;
 }
+.first-book #demo-sound { margin-top: 0; }
 .first-book .demo-controls button:not(:disabled):hover { background: #ffe7b324; }
 .first-book .demo-controls button:disabled { opacity: .35; }
 .first-book .demo-controls button:focus-visible { outline-offset: -3px; }
