@@ -102,37 +102,6 @@ html:has(.bookshop-splash[open]) { overflow: hidden; }
   .bookshop-splash[open] .splash-title { animation: none; }
 }
 
-.quiet-header nav { align-items: center; }
-.quiet-header .splash-audio-replay {
-  min-height: 44px;
-  padding: 0 2px;
-  border: 0;
-  background: transparent;
-  color: #f0d5aa;
-  font: inherit;
-  font-size: 12px;
-  white-space: nowrap;
-  text-underline-offset: .25em;
-}
-.quiet-header .splash-audio-replay:hover { text-decoration: underline; }
-
-.splash-start {
-  position: absolute;
-  z-index: 3;
-  inset-block-start: min(calc(50% + clamp(66px, 14vmin, 150px)), calc(100% - 60px));
-  inset-inline-start: 50%;
-  transform: translateX(-50%);
-  min-height: 44px;
-  padding: 8px 18px;
-  border: 1px solid #f0d5aa80;
-  border-radius: 999px;
-  background: #271a10d9;
-  color: #fff3df;
-  font: 600 14px/1.2 Pretendard, sans-serif;
-  white-space: nowrap;
-}
-.splash-start:focus-visible { outline: 2px solid #fff3df; outline-offset: 3px; }
-
 html::-webkit-scrollbar { width: 2px; }
 html::-webkit-scrollbar-track { background: #211b15; }
 html::-webkit-scrollbar-thumb { background: #997b55; }

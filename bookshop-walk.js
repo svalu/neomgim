@@ -10,8 +10,6 @@ const turnDelay = 780;
 const replayControls = document.querySelectorAll('[data-splash-replay]');
 const soundToggle = document.querySelector('#demo-sound');
 const splashAudio = document.querySelector('#splash-audio');
-const audioReplay = document.querySelector('[data-splash-audio-replay]');
-const startButton = splash.querySelector('.splash-start');
 const twoPageLayout = matchMedia('(min-width: 1000px), (min-width: 768px) and (min-height: 500px)');
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 const reloading = performance.getEntriesByType('navigation')[0]?.type === 'reload';
@@ -135,36 +133,27 @@ if (reloading) {
 }
 
 function startTurn() {
-  startButton.hidden = true;
   sheet.classList.add('is-playing');
   turnTimer = setTimeout(turnLeaf, turnDelay);
   finishTimer = setTimeout(closeSplash, duration + 60);
 }
 
-function playSound(allowPrompt) {
-  if (audioDeadline !== undefined) return;
+function playSound() {
   splashAudio.currentTime = 0;
   const deadline = setTimeout(() => {
     splashAudio.pause();
-    finish(new Error('Sound load timed out'));
-  }, 900);
+    start();
+  }, 250);
   audioDeadline = deadline;
 
-  function finish(error) {
+  function start() {
     if (audioDeadline !== deadline || !splash.open) return;
     clearTimeout(deadline);
     audioDeadline = undefined;
-
-    if (error?.name === 'NotAllowedError' && allowPrompt) {
-      startButton.hidden = false;
-      startButton.focus({ preventScroll: true });
-      return;
-    }
-    audioReplay.hidden = !error;
     startTurn();
   }
 
-  splashAudio.play().then(() => finish(), finish);
+  splashAudio.play().then(start, start);
 }
 
 function closeSplash() {
@@ -176,31 +165,29 @@ function closeSplash() {
   cancelAnimationFrame(frame);
   splashAudio.pause();
   splash.close();
-  startButton.hidden = true;
   sheet.classList.remove('is-turning', 'is-playing');
   leaf.width = 1;
 }
 
-function showSplash(fromClick = false, forceSound = false) {
+function showSplash(fromClick = false) {
   if (splash.open || document.hidden) return;
   if (fromClick) window.scrollTo({ top: 0, behavior: 'instant' });
   syncLayout();
   splash.showModal();
 
-  if (forceSound || soundToggle.getAttribute('aria-pressed') !== 'false') playSound(!fromClick);
+  if (soundToggle.getAttribute('aria-pressed') !== 'false') playSound();
   else startTurn();
 }
 
 if (typeof splash.showModal === 'function') {
   for (const control of replayControls) {
-    if (control !== audioReplay) control.hidden = false;
+    control.hidden = false;
     control.addEventListener('click', event => {
       if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
       event.preventDefault();
-      showSplash(true, control === audioReplay);
+      showSplash(true);
     });
   }
-  startButton.addEventListener('click', () => playSound(false));
   splash.addEventListener('cancel', event => { event.preventDefault(); closeSplash(); });
   sheet.addEventListener('animationend', event => {
     if (event.target === sheet && event.animationName === 'splash-clear') closeSplash();
